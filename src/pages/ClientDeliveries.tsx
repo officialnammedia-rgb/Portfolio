@@ -17,62 +17,69 @@ interface Delivery {
   href: string; // live link (placeholder)
   desc: string;
   stack: string[];
+  image?: string;
 }
 
 const DELIVERIES: Delivery[] = [
   {
     id: "01",
-    title: "Client Project 01",
-    category: "Business",
-    url: "client-one.com",
-    href: "#",
-    desc: "Placeholder — a brief line about this delivery will go here once details are added.",
-    stack: ["React", "Tailwind", "Vite"],
+    title: "Ascendyl",
+    category: "E-commerce",
+    url: "ascendyl.com",
+    href: "https://ascendyl.com",
+    desc: "A fully functional e-commerce clothing store featuring dynamic product lists, shopping cart functionalities, checkout workflows, and modern UI transitions.",
+    stack: ["React", "Tailwind CSS", "Vite", "E-commerce"],
+    image: "/previews/ecommerce.png",
   },
   {
     id: "02",
-    title: "Client Project 02",
-    category: "E-commerce",
-    url: "client-two.com",
-    href: "#",
-    desc: "Placeholder — a brief line about this delivery will go here once details are added.",
-    stack: ["Next.js", "Stripe", "Sanity"],
+    title: "Gurukul FC",
+    category: "Sports",
+    url: "gurukulfc.com",
+    href: "https://gurukulfc.com",
+    desc: "A premium academy portal and website for Gurukul FC featuring trial registrations, free session bookings, official merchandise e-commerce, and Razorpay payment integration.",
+    stack: ["HTML", "Vanilla CSS", "JavaScript", "Razorpay SDK"],
+    image: "/previews/football.png",
   },
   {
     id: "03",
-    title: "Client Project 03",
-    category: "Landing Page",
-    url: "client-three.com",
-    href: "#",
-    desc: "Placeholder — a brief line about this delivery will go here once details are added.",
-    stack: ["HTML", "GSAP", "CSS"],
+    title: "Real Estate & Hospitality Portal",
+    category: "Real Estate",
+    url: "hotel-realestate-website.vercel.app",
+    href: "https://hotel-realestate-website.vercel.app",
+    desc: "A premium responsive web application designed for luxury hotels, Airbnb listings, and real estate properties featuring elegant gallery views, booking forms, and dynamic searches.",
+    stack: ["React", "Tailwind CSS", "Vite", "Framer Motion"],
+    image: "/previews/realestate.png",
   },
   {
     id: "04",
-    title: "Client Project 04",
-    category: "Portfolio",
-    url: "client-four.com",
-    href: "#",
-    desc: "Placeholder — a brief line about this delivery will go here once details are added.",
-    stack: ["React", "Framer Motion"],
+    title: "A2G India",
+    category: "Business",
+    url: "a2gindia.com",
+    href: "https://a2gindia.com",
+    desc: "An official corporate portal designed for an IT services company, showcasing tech stacks, consulting offerings, service portfolios, and interactive client outreach channels.",
+    stack: ["React", "Tailwind CSS", "Vite", "SEO Optimized"],
+    image: "/previews/itservices.png",
   },
   {
     id: "05",
-    title: "Client Project 05",
-    category: "Restaurant",
-    url: "client-five.com",
-    href: "#",
-    desc: "Placeholder — a brief line about this delivery will go here once details are added.",
-    stack: ["WordPress", "PHP"],
+    title: "DelGuru",
+    category: "Education",
+    url: "delguru.com",
+    href: "https://delguru.com",
+    desc: "A high-performance education platform for competitive exam preparation, offering course details, interactive tests, updates, and learning resources.",
+    stack: ["Next.js", "Tailwind CSS", "Responsive", "Education Portal"],
+    image: "/previews/education.png",
   },
   {
     id: "06",
-    title: "Client Project 06",
-    category: "Real Estate",
-    url: "client-six.com",
-    href: "#",
-    desc: "Placeholder — a brief line about this delivery will go here once details are added.",
-    stack: ["React", "Node", "MongoDB"],
+    title: "Cafe @ Friends",
+    category: "Food & Beverage",
+    url: "cafe-at-friends.vercel.app",
+    href: "https://cafe-at-friends.vercel.app",
+    desc: "A gorgeous, modern website designed for a cozy cafe. Currently optimized for desktop view (mobile responsiveness coming soon) with dynamic menus and booking inquiries.",
+    stack: ["React", "Tailwind CSS", "Desktop-first", "Vite"],
+    image: "/previews/cafe.png",
   },
 ];
 
@@ -97,7 +104,7 @@ const DeliveryCard = ({ item }: { item: Delivery }) => (
     variants={cardVariants}
     className="group bg-[#101010] rounded-2xl border border-white/5 overflow-hidden flex flex-col shadow-lg hover:border-primary/25 transition-colors duration-300"
   >
-    {/* Browser-chrome preview (placeholder until real screenshots land) */}
+    {/* Browser-chrome preview */}
     <div className="relative">
       <div className="flex items-center gap-1.5 px-3 py-2.5 bg-[#151515] border-b border-white/5">
         <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
@@ -108,13 +115,23 @@ const DeliveryCard = ({ item }: { item: Delivery }) => (
         </div>
       </div>
       <div className="aspect-[16/10] bg-gradient-to-br from-[#1c1c1c] via-[#121212] to-[#0a0a0a] flex items-center justify-center relative overflow-hidden">
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-primary/10 blur-[60px] rounded-full" />
-        <div className="relative flex flex-col items-center gap-2">
-          <Globe className="w-9 h-9 text-primary/40 group-hover:text-primary/70 transition-colors" />
-          <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-gray-600">
-            Preview soon
-          </span>
-        </div>
+        {item.image ? (
+          <img
+            src={item.image}
+            alt={item.title}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-primary/10 blur-[60px] rounded-full" />
+            <div className="relative flex flex-col items-center gap-2">
+              <Globe className="w-9 h-9 text-primary/40 group-hover:text-primary/70 transition-colors" />
+              <span className="text-[10px] font-mono uppercase tracking-[0.25em] text-gray-600">
+                Preview soon
+              </span>
+            </div>
+          </>
+        )}
         {/* hover sheen */}
         <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
       </div>
