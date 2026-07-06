@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ArrowRight, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { WordsPullUp } from "./WordsPullUp";
 import heroPoster from "../assets/hero.png";
@@ -16,6 +16,7 @@ export const Hero = () => {
     { label: "Inquiries", href: "#inquiries" },
   ];
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div id="home" className="h-screen w-full bg-black relative overflow-hidden">
@@ -52,8 +53,8 @@ export const Hero = () => {
         {/* Extra bottom scrim to anchor the giant heading */}
         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
 
-        {/* Navbar */}
-        <nav className="absolute top-0 left-1/2 -translate-x-1/2 bg-black rounded-b-2xl md:rounded-b-3xl px-4 py-2.5 md:px-8 z-50 shadow-lg border-b border-l border-r border-white/5">
+        {/* Desktop Navbar */}
+        <nav className="hidden md:block absolute top-0 left-1/2 -translate-x-1/2 bg-black rounded-b-2xl md:rounded-b-3xl px-4 py-2.5 md:px-8 z-50 shadow-lg border-b border-l border-r border-white/5">
           <div className="flex items-center gap-3 sm:gap-6 md:gap-10 lg:gap-12">
             {navItems.map((item, idx) => {
               const style = {
@@ -88,6 +89,88 @@ export const Hero = () => {
             })}
           </div>
         </nav>
+
+        {/* Mobile Hamburger Button */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="md:hidden fixed top-5 right-5 z-50 w-11 h-11 rounded-full bg-black/40 backdrop-blur-md border border-white/10 flex items-center justify-center text-[#E1E0CC] shadow-lg focus:outline-none transition-all duration-300 hover:bg-black/60 hover:border-primary/45 active:scale-95"
+          aria-label="Toggle Menu"
+        >
+          {isOpen ? <X className="w-5 h-5 text-primary" /> : <Menu className="w-5 h-5" />}
+        </button>
+
+        {/* Mobile Drawer Navigation */}
+        <AnimatePresence>
+          {isOpen && (
+            <>
+              {/* Backdrop Overlay */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setIsOpen(false)}
+                className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+              />
+
+              {/* Sliding Drawer */}
+              <motion.div
+                initial={{ x: "100%" }}
+                animate={{ x: 0 }}
+                exit={{ x: "100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                className="md:hidden fixed top-0 right-0 h-screen w-[75vw] sm:w-[50vw] max-w-[300px] bg-black/40 backdrop-blur-2xl border-l border-white/10 z-40 shadow-2xl p-8 pt-24 flex flex-col justify-between"
+              >
+                {/* Top part / Navigation links */}
+                <div className="flex flex-col gap-8">
+                  {/* Logo or Title */}
+                  <div className="border-b border-white/5 pb-4">
+                    <span className="font-light text-primary/50 text-base">Naman </span>
+                    <span className="font-extrabold text-primary text-base">Kumar*</span>
+                  </div>
+
+                  {/* Nav Links */}
+                  <div className="flex flex-col gap-6">
+                    {navItems.map((item) => {
+                      const isRoute = "to" in item && item.to;
+                      const content = (
+                        <span className="text-sm font-medium tracking-widest uppercase transition-colors">
+                          {item.label}
+                        </span>
+                      );
+
+                      return isRoute ? (
+                        <Link
+                          key={item.label}
+                          to={item.to!}
+                          onClick={() => setIsOpen(false)}
+                          className="text-primary/70 hover:text-primary transition-colors py-2 flex items-center justify-between border-b border-white/5"
+                        >
+                          {content}
+                          <span className="text-xs text-primary/30">→</span>
+                        </Link>
+                      ) : (
+                        <a
+                          key={item.label}
+                          href={item.href}
+                          onClick={() => setIsOpen(false)}
+                          className="text-primary/70 hover:text-primary transition-colors py-2 flex items-center justify-between border-b border-white/5"
+                        >
+                          {content}
+                          <span className="text-xs text-primary/30">→</span>
+                        </a>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Bottom part / Footer */}
+                <div className="text-[10px] text-gray-500 font-mono tracking-wider">
+                  © {new Date().getFullYear()} Naman Kumar. All rights reserved.
+                </div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
 
         {/* Hero Content */}
         <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 md:p-12 z-10 w-full">
