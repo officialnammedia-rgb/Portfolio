@@ -3,6 +3,7 @@ import { Routes, Route, useLocation } from "react-router-dom";
 import { Home } from "./pages/Home";
 import { ClientDeliveries } from "./pages/ClientDeliveries";
 import { ComingSoon } from "./pages/ComingSoon";
+import { Inquiry } from "./pages/Inquiry";
 
 // Scroll to top on route change, or to a hash target when one is present.
 const ScrollManager = () => {
@@ -29,6 +30,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/work" element={<ClientDeliveries />} />
+        <Route path="/inquiry" element={<Inquiry />} />
         <Route path="/coming-soon" element={<ComingSoon />} />
       </Routes>
     </>

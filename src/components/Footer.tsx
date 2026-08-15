@@ -1,4 +1,5 @@
 import { Mail, MapPin } from "lucide-react";
+import { Link } from "react-router-dom";
 import { ContactForm } from "./ContactForm";
 
 export const Footer = () => {
@@ -18,6 +19,12 @@ export const Footer = () => {
           <p className="text-gray-400 text-sm leading-relaxed font-light">
             I build websites, run small projects, and I'm always up for a good problem to solve. If you'd like to work together or just say hi, my inbox is open.
           </p>
+          <Link
+            to="/inquiry"
+            className="inline-flex w-fit text-xs sm:text-sm font-medium tracking-wider uppercase text-primary/70 hover:text-primary transition-colors"
+          >
+            Open campaign inquiry page
+          </Link>
           <div className="flex flex-col gap-2.5 mt-4 text-xs sm:text-sm text-gray-500 font-light">
             <div className="flex items-center gap-2">
               <Mail className="w-4 h-4 text-primary" />
