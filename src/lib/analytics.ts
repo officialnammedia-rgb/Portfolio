@@ -10,7 +10,11 @@ declare global {
 export const hasGoogleAnalytics = () => Boolean(GA_MEASUREMENT_ID);
 
 export const initializeGoogleAnalytics = () => {
-  if (!GA_MEASUREMENT_ID || typeof document === "undefined" || window.gtag) {
+  if (!GA_MEASUREMENT_ID || typeof document === "undefined") {
+    return;
+  }
+
+  if (window.gtag) {
     return;
   }
 
@@ -21,8 +25,8 @@ export const initializeGoogleAnalytics = () => {
   script.src = `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`;
   document.head.appendChild(script);
 
-  window.gtag = (...args: unknown[]) => {
-    window.dataLayer?.push(args);
+  window.gtag = function gtag() {
+    window.dataLayer?.push(arguments as unknown as unknown[]);
   };
 
   window.gtag("js", new Date());
