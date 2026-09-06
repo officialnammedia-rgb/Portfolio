@@ -33,7 +33,7 @@ export const Hero = () => {
 
         {/* Background Video */}
         <video
-          src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260405_170732_8a9ccda6-5cff-4628-b164-059c500a2b41.mp4"
+          src="https://zxdefgavgwfxastwmmjm.supabase.co/storage/v1/object/public/assets/prisma.mp4"
           poster={heroPoster}
           autoPlay
           loop
