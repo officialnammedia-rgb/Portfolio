@@ -1,8 +1,9 @@
 import { useRef } from "react";
-import { useScroll, motion } from "framer-motion";
+import { useScroll } from "framer-motion";
 import { WordsPullUpMultiStyle } from "./WordsPullUpMultiStyle";
 import { AnimatedLetter } from "./AnimatedLetter";
 import { Convergence } from "./Convergence";
+import { GlareCard } from "./GlareCard";
 import { Cpu, Heart, Flame, Shield } from "lucide-react";
 
 export const About = () => {
@@ -165,33 +166,34 @@ export const About = () => {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-5">
               {drives.map((drive, idx) => (
-                <motion.div
+                <GlareCard
                   key={idx}
+                  variant="gold"
+                  glareIndex={idx}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: idx * 0.1, duration: 0.6 }}
-                  className="bg-[#151515] border border-white/5 rounded-2xl p-7 md:p-9 hover:border-primary/25 transition-all duration-300 group relative overflow-hidden"
+                  className="bg-[#151515] p-7 md:p-9"
                 >
-                  {/* hover glow */}
-                  <div className="absolute -inset-px bg-gradient-to-br from-primary/15 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl" />
-
-                  <div className="relative z-10 flex items-start justify-between mb-5">
-                    <div className="bg-black w-12 h-12 rounded-xl flex items-center justify-center border border-white/5 group-hover:border-primary/30 transition-colors">
-                      {drive.icon}
+                  <div className="flex items-start justify-between mb-5">
+                    <div className="bg-black w-12 h-12 rounded-xl flex items-center justify-center border border-white/5 group-hover:border-amber-400/30 group-hover:shadow-[0_0_15px_-3px_rgba(245,158,11,0.3)] transition-all duration-300">
+                      <div className="group-hover:scale-110 transition-transform duration-300 [&>svg]:text-amber-300/90 group-hover:[&>svg]:text-amber-300">
+                        {drive.icon}
+                      </div>
                     </div>
-                    <span className="text-sm font-mono text-primary/30 group-hover:text-primary/60 transition-colors">
+                    <span className="text-sm font-mono text-amber-400/40 group-hover:text-amber-300/80 transition-colors">
                       0{idx + 1}
                     </span>
                   </div>
 
-                  <h4 className="relative z-10 text-[#E1E0CC] font-semibold text-xl md:text-2xl mb-3 group-hover:text-primary transition-colors tracking-tight">
+                  <h4 className="text-[#E1E0CC] font-semibold text-xl md:text-2xl mb-3 group-hover:text-amber-200 transition-colors tracking-tight">
                     {drive.title}
                   </h4>
-                  <p className="relative z-10 text-gray-400 text-sm sm:text-base leading-relaxed font-light">
+                  <p className="text-gray-400 text-sm sm:text-base leading-relaxed font-light">
                     {drive.desc}
                   </p>
-                </motion.div>
+                </GlareCard>
               ))}
             </div>
           </div>

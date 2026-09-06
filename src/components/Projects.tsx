@@ -4,6 +4,7 @@ import { motion, useInView } from "framer-motion";
 import { ArrowRight, ArrowUpRight, Clock, Globe, Lock, Terminal, Server, Clipboard } from "lucide-react";
 import { Link } from "react-router-dom";
 import { WordsPullUpMultiStyle } from "./WordsPullUpMultiStyle";
+import { GlareCard } from "./GlareCard";
 
 type Cta =
   | { kind: "route"; label: string; to: string }
@@ -147,44 +148,45 @@ export const Projects = () => {
           animate={isGridInView ? "show" : "hidden"}
           className="grid grid-cols-1 md:grid-cols-2 gap-5"
         >
-          {projectsData.map((project) => (
-            <motion.div
+          {projectsData.map((project, idx) => (
+            <GlareCard
               key={project.id}
+              variant="blue"
+              glareIndex={idx}
               variants={cardVariants}
-              className="bg-[#101010] rounded-2xl p-7 md:p-9 flex flex-col border border-white/5 relative overflow-hidden group hover:border-primary/25 transition-colors duration-300 shadow-lg"
+              className="bg-[#101010] p-7 md:p-9 flex flex-col"
             >
-              {/* Corner hover glow */}
-              <div className="absolute -inset-px bg-gradient-to-br from-primary/15 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none rounded-2xl" />
-
               {/* Header */}
-              <div className="relative z-10 flex items-start justify-between mb-6">
-                <div className="bg-black w-12 h-12 rounded-xl flex items-center justify-center border border-white/5 group-hover:border-primary/30 transition-colors">
-                  {project.icon}
+              <div className="flex items-start justify-between mb-6">
+                <div className="bg-black w-12 h-12 rounded-xl flex items-center justify-center border border-white/5 group-hover:border-sky-400/30 group-hover:shadow-[0_0_15px_-3px_rgba(56,189,248,0.3)] transition-all duration-300">
+                  <div className="group-hover:scale-110 transition-transform duration-300 [&>svg]:text-sky-400 group-hover:[&>svg]:text-sky-300">
+                    {project.icon}
+                  </div>
                 </div>
-                <span className="text-sm font-mono text-primary/30 group-hover:text-primary/60 transition-colors">
+                <span className="text-sm font-mono text-sky-400/40 group-hover:text-sky-300/80 transition-colors">
                   {project.id}
                 </span>
               </div>
 
               {/* Category + Title */}
-              <span className="relative z-10 text-[10px] text-gray-500 font-bold uppercase tracking-[0.15em] block mb-2">
+              <span className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.15em] block mb-2 group-hover:text-sky-400/70 transition-colors">
                 {project.label}
               </span>
-              <h3 className="relative z-10 text-xl md:text-2xl font-semibold text-[#E1E0CC] group-hover:text-primary transition-colors tracking-tight mb-3">
+              <h3 className="text-xl md:text-2xl font-semibold text-[#E1E0CC] group-hover:text-sky-100 transition-colors tracking-tight mb-3">
                 {project.title}
               </h3>
 
               {/* Description */}
-              <p className="relative z-10 text-gray-400 text-sm sm:text-base leading-relaxed font-light mb-6">
+              <p className="text-gray-400 text-sm sm:text-base leading-relaxed font-light mb-6">
                 {project.desc}
               </p>
 
               {/* Tags */}
-              <div className="relative z-10 flex flex-wrap gap-2 mb-6">
+              <div className="flex flex-wrap gap-2 mb-6">
                 {project.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="text-[10px] font-mono text-primary/60 bg-[#151515] border border-white/5 rounded-full px-2.5 py-1"
+                    className="text-[10px] font-mono text-sky-300/70 bg-[#151515] border border-sky-500/10 rounded-full px-2.5 py-1 group-hover:border-sky-500/25 transition-colors"
                   >
                     {tag}
                   </span>
@@ -192,10 +194,10 @@ export const Projects = () => {
               </div>
 
               {/* CTA */}
-              <div className="relative z-10 mt-auto pt-5 border-t border-white/5">
+              <div className="mt-auto pt-5 border-t border-white/5 group-hover:border-sky-500/20 transition-colors">
                 {renderCta(project)}
               </div>
-            </motion.div>
+            </GlareCard>
           ))}
         </motion.div>
       </div>
