@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -7,6 +7,11 @@ import heroPoster from "../assets/hero.png";
 
 export const Hero = () => {
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const targetProgressRef = useRef(0);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
   const navItems = [
     { label: "Our story", href: "#our-story" },
     { label: "Projects", href: "#projects" },
@@ -18,32 +23,77 @@ export const Hero = () => {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  return (
-    <div id="home" className="h-screen w-full bg-black relative overflow-hidden">
-      {/* Full-bleed container */}
-      <div className="w-full h-full overflow-hidden relative">
-        
-        {/* Poster image (paints instantly, hides once video is ready) */}
-        <img
-          src={heroPoster}
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const scrollDistance = rect.height - window.innerHeight;
+      if (scrollDistance <= 0) return;
+      
+      const currentScroll = -rect.top;
+      const progress = Math.min(Math.max(currentScroll / scrollDistance, 0), 1);
+      targetProgressRef.current = progress;
+      setScrollProgress(progress);
+    };
 
-        {/* Background Video */}
-        <video
-          src="https://zxdefgavgwfxastwmmjm.supabase.co/storage/v1/object/public/assets/prisma.mp4"
-          poster={heroPoster}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          onCanPlay={() => setVideoLoaded(true)}
-          style={{ opacity: videoLoaded ? 1 : 0 }}
-          className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ease-out"
-        />
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
+    handleScroll();
+
+    let rafId: number;
+    const updateVideo = () => {
+      const video = videoRef.current;
+      if (video && video.duration && !isNaN(video.duration)) {
+        const targetTime = targetProgressRef.current * video.duration;
+        const diff = targetTime - video.currentTime;
+        if (Math.abs(diff) > 0.003) {
+          video.currentTime = Math.min(Math.max(video.currentTime + diff * 0.15, 0), video.duration);
+        }
+      }
+      rafId = requestAnimationFrame(updateVideo);
+    };
+
+    rafId = requestAnimationFrame(updateVideo);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+      cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  return (
+    <div ref={containerRef} id="home" className="relative w-full h-[300vh] bg-black">
+      {/* Sticky full-screen viewport */}
+      <div className="sticky top-0 h-screen w-full overflow-hidden">
+        {/* Full-bleed container */}
+        <div className="w-full h-full overflow-hidden relative">
+          
+          {/* Poster image (paints instantly, hides once video is ready) */}
+          <img
+            src={heroPoster}
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover object-center"
+          />
+
+          {/* Background Video (controlled by scroll) */}
+          <video
+            ref={videoRef}
+            src="https://zxdefgavgwfxastwmmjm.supabase.co/storage/v1/object/public/assets/prisma.mp4"
+            poster={heroPoster}
+            muted
+            playsInline
+            preload="auto"
+            onLoadedMetadata={() => {
+              if (videoRef.current) {
+                videoRef.current.currentTime = 0;
+              }
+            }}
+            onCanPlay={() => setVideoLoaded(true)}
+            style={{ opacity: videoLoaded ? 1 : 0 }}
+            className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ease-out pointer-events-none"
+          />
 
         {/* Noise Overlay */}
         <div className="absolute inset-0 noise-overlay opacity-[0.7] mix-blend-overlay pointer-events-none" />
@@ -235,7 +285,21 @@ export const Hero = () => {
           </div>
         </div>
 
+        {/* Subtle Video Scrub Scroll Indicator */}
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 pointer-events-none opacity-60">
+          <div className="w-16 h-1 bg-white/10 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary/80 transition-all duration-75 rounded-full"
+              style={{ width: `${Math.round(scrollProgress * 100)}%` }}
+            />
+          </div>
+          <span className="text-[9px] uppercase tracking-widest text-primary/60 font-mono">
+            {scrollProgress >= 0.98 ? "Scroll down" : "Scroll to explore"}
+          </span>
+        </div>
+
       </div>
     </div>
+  </div>
   );
 };
