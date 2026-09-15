@@ -25,10 +25,10 @@ export const Hero = () => {
 
   useEffect(() => {
     const video = videoRef.current;
+    if (!video) return;
 
     let isSeeking = false;
-    let pendingTime: number | null = null;
-    let smoothedTime = 0;
+    let pendingSeekTime: number | null = null;
     let rafId: number;
 
     const handleScroll = () => {
@@ -47,54 +47,72 @@ export const Hero = () => {
     window.addEventListener("resize", handleScroll, { passive: true });
     handleScroll();
 
-    const seekVideo = (time: number) => {
+    const doSeek = (time: number) => {
       const v = videoRef.current;
       if (!v || !v.duration || isNaN(v.duration)) return;
-      const clampedTime = Math.min(Math.max(time, 0), v.duration);
+      const clamped = Math.min(Math.max(time, 0), v.duration);
 
       if (isSeeking || v.seeking) {
-        pendingTime = clampedTime;
+        pendingSeekTime = clamped;
         return;
       }
 
-      // Avoid redundant seeks if change is sub-frame (< 30ms)
-      if (Math.abs(v.currentTime - clampedTime) < 0.02) {
-        return;
-      }
+      if (Math.abs(v.currentTime - clamped) < 0.03) return;
 
       isSeeking = true;
       try {
         if ("fastSeek" in v && typeof (v as any).fastSeek === "function") {
-          (v as any).fastSeek(clampedTime);
+          (v as any).fastSeek(clamped);
         } else {
-          v.currentTime = clampedTime;
+          v.currentTime = clamped;
         }
       } catch {
-        v.currentTime = clampedTime;
+        v.currentTime = clamped;
       }
     };
 
     const handleSeeked = () => {
       isSeeking = false;
-      if (pendingTime !== null) {
-        const nextTime = pendingTime;
-        pendingTime = null;
-        seekVideo(nextTime);
+      if (pendingSeekTime !== null) {
+        const next = pendingSeekTime;
+        pendingSeekTime = null;
+        doSeek(next);
       }
     };
 
-    if (video) {
-      video.addEventListener("seeked", handleSeeked);
-    }
+    video.addEventListener("seeked", handleSeeked);
 
     const updateLoop = () => {
       const v = videoRef.current;
       if (v && v.duration && !isNaN(v.duration)) {
         const targetTime = targetProgressRef.current * v.duration;
-        const diff = targetTime - smoothedTime;
-        if (Math.abs(diff) > 0.002) {
-          smoothedTime += diff * 0.2;
-          seekVideo(smoothedTime);
+        const diff = targetTime - v.currentTime;
+
+        // Big jump (e.g. clicking nav link or fast fling) -> seek directly
+        if (Math.abs(diff) > 1.2) {
+          if (!v.paused) v.pause();
+          doSeek(targetTime);
+        }
+        // Forward scroll: Leverage hardware video.play() with dynamic playbackRate for 60/120fps native decode
+        else if (diff > 0.03) {
+          const desiredRate = Math.min(Math.max(diff * 3.8, 0.4), 4.0);
+          v.playbackRate = desiredRate;
+          if (v.paused) {
+            v.play().catch(() => {});
+          }
+        }
+        // Reached target position: Pause video cleanly
+        else if (diff >= -0.04 && diff <= 0.03) {
+          if (!v.paused) {
+            v.pause();
+          }
+        }
+        // Backward scroll: Pause and seek smoothly towards target
+        else if (diff < -0.04) {
+          if (!v.paused) {
+            v.pause();
+          }
+          doSeek(targetTime);
         }
       }
       rafId = requestAnimationFrame(updateLoop);
@@ -105,10 +123,11 @@ export const Hero = () => {
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
-      if (video) {
-        video.removeEventListener("seeked", handleSeeked);
-      }
+      video.removeEventListener("seeked", handleSeeked);
       cancelAnimationFrame(rafId);
+      if (video && !video.paused) {
+        video.pause();
+      }
     };
   }, []);
 
