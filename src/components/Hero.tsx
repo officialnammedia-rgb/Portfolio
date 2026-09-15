@@ -24,6 +24,13 @@ export const Hero = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
+    const video = videoRef.current;
+
+    let isSeeking = false;
+    let pendingTime: number | null = null;
+    let smoothedTime = 0;
+    let rafId: number;
+
     const handleScroll = () => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
@@ -40,24 +47,67 @@ export const Hero = () => {
     window.addEventListener("resize", handleScroll, { passive: true });
     handleScroll();
 
-    let rafId: number;
-    const updateVideo = () => {
-      const video = videoRef.current;
-      if (video && video.duration && !isNaN(video.duration)) {
-        const targetTime = targetProgressRef.current * video.duration;
-        const diff = targetTime - video.currentTime;
-        if (Math.abs(diff) > 0.003) {
-          video.currentTime = Math.min(Math.max(video.currentTime + diff * 0.15, 0), video.duration);
-        }
+    const seekVideo = (time: number) => {
+      const v = videoRef.current;
+      if (!v || !v.duration || isNaN(v.duration)) return;
+      const clampedTime = Math.min(Math.max(time, 0), v.duration);
+
+      if (isSeeking || v.seeking) {
+        pendingTime = clampedTime;
+        return;
       }
-      rafId = requestAnimationFrame(updateVideo);
+
+      // Avoid redundant seeks if change is sub-frame (< 30ms)
+      if (Math.abs(v.currentTime - clampedTime) < 0.02) {
+        return;
+      }
+
+      isSeeking = true;
+      try {
+        if ("fastSeek" in v && typeof (v as any).fastSeek === "function") {
+          (v as any).fastSeek(clampedTime);
+        } else {
+          v.currentTime = clampedTime;
+        }
+      } catch {
+        v.currentTime = clampedTime;
+      }
     };
 
-    rafId = requestAnimationFrame(updateVideo);
+    const handleSeeked = () => {
+      isSeeking = false;
+      if (pendingTime !== null) {
+        const nextTime = pendingTime;
+        pendingTime = null;
+        seekVideo(nextTime);
+      }
+    };
+
+    if (video) {
+      video.addEventListener("seeked", handleSeeked);
+    }
+
+    const updateLoop = () => {
+      const v = videoRef.current;
+      if (v && v.duration && !isNaN(v.duration)) {
+        const targetTime = targetProgressRef.current * v.duration;
+        const diff = targetTime - smoothedTime;
+        if (Math.abs(diff) > 0.002) {
+          smoothedTime += diff * 0.2;
+          seekVideo(smoothedTime);
+        }
+      }
+      rafId = requestAnimationFrame(updateLoop);
+    };
+
+    rafId = requestAnimationFrame(updateLoop);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("resize", handleScroll);
+      if (video) {
+        video.removeEventListener("seeked", handleSeeked);
+      }
       cancelAnimationFrame(rafId);
     };
   }, []);
@@ -77,7 +127,7 @@ export const Hero = () => {
             className="absolute inset-0 w-full h-full object-cover object-center"
           />
 
-          {/* Background Video (controlled by scroll) */}
+          {/* Background Video (controlled by scroll, optimized for mobile decoders) */}
           <video
             ref={videoRef}
             src="https://zxdefgavgwfxastwmmjm.supabase.co/storage/v1/object/public/assets/prisma.mp4"
@@ -85,13 +135,19 @@ export const Hero = () => {
             muted
             playsInline
             preload="auto"
+            disablePictureInPicture
+            disableRemotePlayback
             onLoadedMetadata={() => {
               if (videoRef.current) {
                 videoRef.current.currentTime = 0;
               }
             }}
             onCanPlay={() => setVideoLoaded(true)}
-            style={{ opacity: videoLoaded ? 1 : 0 }}
+            style={{
+              opacity: videoLoaded ? 1 : 0,
+              transform: "translateZ(0)",
+              willChange: "transform",
+            }}
             className="absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 ease-out pointer-events-none"
           />
 
